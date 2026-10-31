@@ -88,8 +88,8 @@ label input{margin-top:3px;padding:9px 8px}
       <datalist id="items"></datalist>
       <div class="hint" id="hint"></div>
       <div class="g3">
-        <label>Price each<input id="price" type="number" step="0.01" min="0" inputmode="decimal" required></label>
-        <label>Qty<input id="qty" type="number" step="any" min="0" value="1" inputmode="decimal"></label>
+        <label>Price each<input id="price" type="text" inputmode="decimal" placeholder="0,00" required></label>
+        <label>Qty<input id="qty" type="text" inputmode="decimal" value="1"></label>
         <label>Date<input id="date" type="date"></label>
       </div>
       <div class="g2"><select id="bucket"></select><button class="add">Add purchase</button></div>
@@ -128,6 +128,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const dshort=(d,y)=>new Date(d+'T00:00:00').toLocaleDateString('en-GB',y?{day:'numeric',month:'short',year:'numeric'}:{day:'numeric',month:'short'});
 const total=()=>KEYS.reduce((a,k)=>a+plan[k],0);
 const key=s=>s.trim().toLowerCase().replace(/\s+/g,' ');
+const num=v=>parseFloat(String(v).replace(/\s/g,'').replace(',','.'));
 
 function groups(){
   const m=new Map();
@@ -148,7 +149,7 @@ const chip=h=>h.length<2?'':chipv(h[h.length-2].price,h[h.length-1].price);
 
 /* ---------- budget rebalancing ---------- */
 function setBudget(k,v){
-  v=Math.max(0,Math.round(+v||0));
+  v=Math.max(0,Math.round(num(v)||0));
   const p=PARTNER[k],old=plan[k];
   let d=v-old,limited=false;
   if(plan[p]-d<0){d=plan[p];limited=true}
@@ -157,7 +158,7 @@ function setBudget(k,v){
   save();renderBudget();
 }
 function setTotal(t){
-  t=Math.max(0,Math.round(+t||0));
+  t=Math.max(0,Math.round(num(t)||0));
   let d=t-total();
   if(d>0)plan.buf+=d;
   else{let r=-d;for(const k of ['buf','w4','w3','w2','w1','bulk']){const x=Math.min(plan[k],r);plan[k]-=x;r-=x}}
@@ -185,11 +186,11 @@ function renderBudget(){
   ${msg?`<div class="note">${msg}</div>`:''}
   ${KEYS.map(k=>{const l=plan[k]-sp[k],p=pc(sp[k],plan[k]);return `
   <div class="row">
-    <div class="rtop"><span class="rn">${LBL[k]}</span><span class="amt"><input type="number" inputmode="numeric" data-k="${k}" value="${plan[k]}"><u>MAD</u></span></div>
+    <div class="rtop"><span class="rn">${LBL[k]}</span><span class="amt"><input type="text" inputmode="decimal" data-k="${k}" value="${plan[k]}"><u>MAD</u></span></div>
     <div class="bar sm"><i class="${cls(p)}" style="width:${Math.min(100,p)}%"></i></div>
     <div class="rsub"><span>Spent ${fmt(sp[k])}</span><span class="${l<0?'neg':''}">${l<0?'Over by '+fmt(-l):'Left '+fmt(l)}</span></div>
   </div>`}).join('')}
-  <div class="row tot"><div class="rtop" style="margin:0"><span class="rn">Total budget</span><span class="amt"><input id="tot" type="number" inputmode="numeric" value="${T}"><u>MAD</u></span></div></div>
+  <div class="row tot"><div class="rtop" style="margin:0"><span class="rn">Total budget</span><span class="amt"><input id="tot" type="text" inputmode="decimal" value="${T}"><u>MAD</u></span></div></div>
   <div class="hint">Change any amount and the next line adjusts so the total stays the same (bulk → Week 1 → Week 2 → … → buffer). Edit the total to change the whole budget.</div>
   <div class="tiny"><button id="cp">Copy backup</button><button id="rs">Restore backup</button></div>`;
   v.querySelectorAll('input[data-k]').forEach(i=>i.onchange=()=>setBudget(i.dataset.k,i.value));
@@ -267,9 +268,9 @@ $('#item').oninput=()=>{
 
 $('#f').onsubmit=e=>{
   e.preventDefault();
-  const name=$('#item').value.trim(),pr=parseFloat($('#price').value);
+  const name=$('#item').value.trim(),pr=num($('#price').value);
   if(!name||isNaN(pr)||pr<0)return;
-  buys.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),date:$('#date').value||today(),item:name,price:pr,qty:parseFloat($('#qty').value)||1,bucket:$('#bucket').value});
+  buys.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),date:$('#date').value||today(),item:name,price:pr,qty:num($('#qty').value)||1,bucket:$('#bucket').value});
   month=($('#date').value||today()).slice(0,7);msg='';
   save();
   $('#item').value='';$('#price').value='';delete $('#price').dataset.auto;$('#qty').value=1;$('#hint').textContent='';
