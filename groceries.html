@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Groceries">
+<title>Grocery Ledger</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F2EEE3;--raised:#FAF8F1;--ink:#24312A;--soft:#5B6459;--line:#C9C2AE;--line2:#DEDACB;--brass:#A9822C;--bsoft:#EDE1C3;--miss:#8C3B2E;--msoft:#F1E1DD;--teal:#2F5D50;--tsoft:#E1EAE6}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.4 'IBM Plex Sans',sans-serif;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased}
+.app{max-width:640px;margin:0 auto;padding:26px 18px 60px;min-height:100vh}
+.mono,.eyebrow,label,.tab,.hint,.rsub,.chip,u,.is,.ir{font-family:'IBM Plex Mono',monospace}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);display:block;margin-bottom:4px}
+h1{font:600 28px/1.05 'Fraunces',serif;margin:0 0 18px;padding-bottom:16px;border-bottom:2px solid var(--ink)}
+input,select{font:16px 'IBM Plex Mono',monospace;color:var(--ink);background:var(--raised);border:1px solid var(--line);border-radius:8px;padding:10px;width:100%}
+input:focus,select:focus{outline:2px solid var(--teal);outline-offset:0}
+.mnav{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:16px}
+.mnav button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--raised);color:var(--ink);font-size:16px}
+#mlabel{font:600 19px 'Fraunces',serif;min-width:150px;text-align:center}
+.tabs{display:flex;border:1px solid var(--ink);border-radius:8px;overflow:hidden;margin-bottom:20px}
+.tab{flex:1;padding:10px;background:var(--paper);border:none;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}
+.tab+.tab{border-left:1px solid var(--ink)}
+.tab.on{background:var(--ink);color:var(--paper)}
+[hidden]{display:none!important}
+.hero{padding-bottom:14px;border-bottom:1px solid var(--line2)}
+.lab{font:11px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--soft)}
+.big{font:600 40px/1.15 'Fraunces',serif;margin:2px 0 10px}
+.big small{font:14px 'IBM Plex Mono',monospace;color:var(--soft)}
+.neg{color:var(--miss)}
+.bar{height:8px;background:var(--line2);border-radius:4px;overflow:hidden}
+.bar.sm{height:5px}
+.bar i{display:block;height:100%;background:var(--teal);border-radius:4px;transition:width .3s}
+.bar i.warn{background:var(--brass)}.bar i.over{background:var(--miss)}
+.sub{font:12px 'IBM Plex Mono',monospace;color:var(--soft);margin-top:8px}
+.row{padding:12px 0;border-bottom:1px solid var(--line2)}
+.row.tot{border-bottom:none;border-top:2px solid var(--ink);margin-top:4px}
+.rtop{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.rn{font:600 16px 'Fraunces',serif}
+.amt{display:flex;align-items:baseline;gap:6px}
+.amt input{width:100px;text-align:right;border:none;border-bottom:2px solid var(--ink);border-radius:0;background:transparent;padding:2px 0;font-weight:600}
+u{text-decoration:none;font-size:12px;color:var(--soft)}
+.rsub{display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-top:6px}
+.note{background:var(--bsoft);border-left:3px solid var(--brass);padding:8px 10px;font-size:13px;margin:12px 0;border-radius:0 6px 6px 0}
+.hint{font-size:12px;color:var(--soft);margin:8px 0;min-height:16px}
+.tiny{display:flex;gap:10px;margin-top:18px}
+.tiny button{flex:1;padding:9px;border:1px solid var(--line);background:transparent;border-radius:8px;font:12px 'IBM Plex Mono',monospace;color:var(--soft)}
+.card{background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1.2fr .8fr 1.4fr;gap:8px;margin-top:6px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+label{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);display:block}
+label input{margin-top:3px;padding:9px 8px}
+.add{background:var(--ink);color:var(--paper);border:none;border-radius:8px;font:600 14px 'IBM Plex Mono',monospace;padding:10px}
+.li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line2)}
+.in{font-weight:500}
+.is{font-size:12px;color:var(--soft)}
+.ir{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.x{border:none;background:none;color:var(--soft);font-size:22px;padding:0 4px}
+.chip{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;white-space:nowrap}
+.chip.up{background:var(--msoft);color:var(--miss)}.chip.dn{background:var(--tsoft);color:var(--teal)}.chip.eq{background:var(--line2);color:var(--soft)}
+.pi{border-bottom:1px solid var(--line2)}
+.pi summary{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 0;list-style:none}
+.pi summary::-webkit-details-marker{display:none}
+.ph{padding:0 0 12px;font:12px 'IBM Plex Mono',monospace;color:var(--soft)}
+.ph .hr{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.ph .st{margin-bottom:6px;color:var(--ink)}
+.empty{text-align:center;color:var(--soft);padding:28px 0;font-size:14px}
+</style>
+</head>
+<body>
+<div class="app">
+  <span class="eyebrow">Grocery Ledger</span>
+  <h1>Budget &amp; Prices</h1>
+  <div class="mnav" id="mnav"><button id="pm" aria-label="Previous month">‹</button><span id="mlabel"></span><button id="nm" aria-label="Next month">›</button></div>
+  <div class="tabs">
+    <button class="tab on" data-v="budget">Budget</button>
+    <button class="tab" data-v="spend">Spend</button>
+    <button class="tab" data-v="prices">Prices</button>
+  </div>
+
+  <section id="v-budget"></section>
+
+  <section id="v-spend" hidden>
+    <form id="f" class="card" autocomplete="off">
+      <input id="item" list="items" placeholder="Item, e.g. Olive oil 1L" required>
+      <datalist id="items"></datalist>
+      <div class="hint" id="hint"></div>
+      <div class="g3">
+        <label>Price each<input id="price" type="number" step="0.01" min="0" inputmode="decimal" required></label>
+        <label>Qty<input id="qty" type="number" step="any" min="0" value="1" inputmode="decimal"></label>
+        <label>Date<input id="date" type="date"></label>
+      </div>
+      <div class="g2"><select id="bucket"></select><button class="add">Add purchase</button></div>
+    </form>
+    <div id="list"></div>
+  </section>
+
+  <section id="v-prices" hidden>
+    <input id="q" type="search" placeholder="Search items…" style="margin-bottom:6px">
+    <div id="plist"></div>
+  </section>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const KEYS=['bulk','w1','w2','w3','w4','buf'];
+const LBL={bulk:'Monthly bulk shopping',w1:'Week 1',w2:'Week 2',w3:'Week 3',w4:'Week 4',buf:'Price buffer'};
+const PARTNER={bulk:'w1',w1:'w2',w2:'w3',w3:'w4',w4:'buf',buf:'w4'};
+const DEF={bulk:550,w1:490,w2:490,w3:490,w4:380,buf:100};
+
+let store=null;const mem={};
+try{localStorage.setItem('_t','1');localStorage.removeItem('_t');store=localStorage}catch(e){}
+const lsGet=k=>{try{return store?store.getItem(k):(mem[k]??null)}catch(e){return mem[k]??null}};
+const lsSet=(k,v)=>{mem[k]=v;try{store&&store.setItem(k,v)}catch(e){}};
+const rd=(k,d)=>{try{const v=JSON.parse(lsGet(k));return v==null?d:v}catch(e){return d}};
+
+const pad=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+let plan=Object.assign({},DEF,rd('gb_plan',{}));
+let buys=rd('gb_buys',[]);
+let month=today().slice(0,7),msg='';
+const save=()=>{lsSet('gb_plan',JSON.stringify(plan));lsSet('gb_buys',JSON.stringify(buys))};
+
+const fmt=n=>Number(n).toLocaleString('en-US',{maximumFractionDigits:2});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dshort=(d,y)=>new Date(d+'T00:00:00').toLocaleDateString('en-GB',y?{day:'numeric',month:'short',year:'numeric'}:{day:'numeric',month:'short'});
+const total=()=>KEYS.reduce((a,k)=>a+plan[k],0);
+const key=s=>s.trim().toLowerCase().replace(/\s+/g,' ');
+
+function groups(){
+  const m=new Map();
+  [...buys].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0).forEach(b=>{
+    const k=key(b.item);
+    if(!m.has(k))m.set(k,{name:b.item,h:[]});
+    const g=m.get(k);g.name=b.item;g.h.push(b);
+  });
+  return m;
+}
+function chipv(a,b){
+  if(a==null||!a)return '';
+  if(a===b)return '<span class="chip eq">= same</span>';
+  const p=(b-a)/a*100;
+  return `<span class="chip ${p>0?'up':'dn'}">${p>0?'▲':'▼'} ${Math.abs(+p.toFixed(1))}%</span>`;
+}
+const chip=h=>h.length<2?'':chipv(h[h.length-2].price,h[h.length-1].price);
+
+/* ---------- budget rebalancing ---------- */
+function setBudget(k,v){
+  v=Math.max(0,Math.round(+v||0));
+  const p=PARTNER[k],old=plan[k];
+  let d=v-old,limited=false;
+  if(plan[p]-d<0){d=plan[p];limited=true}
+  plan[k]=old+d;plan[p]-=d;
+  msg=d||limited?`${LBL[k]} is now ${fmt(plan[k])} MAD, so ${LBL[p]} was adjusted to ${fmt(plan[p])} MAD to keep the total at ${fmt(total())} MAD.`+(limited?` (${LBL[p]} can’t go below 0, so the change was limited.)`:''):'';
+  save();renderBudget();
+}
+function setTotal(t){
+  t=Math.max(0,Math.round(+t||0));
+  let d=t-total();
+  if(d>0)plan.buf+=d;
+  else{let r=-d;for(const k of ['buf','w4','w3','w2','w1','bulk']){const x=Math.min(plan[k],r);plan[k]-=x;r-=x}}
+  msg=d?`Total budget is now ${fmt(total())} MAD. The difference was ${d>0?'added to the price buffer':'taken from the price buffer first, then Week 4, Week 3 and so on'}.`:'';
+  save();renderBudget();
+}
+
+/* ---------- render ---------- */
+const pc=(s,b)=>b?s/b*100:(s?101:0);
+const cls=p=>p>100?'over':p>85?'warn':'';
+
+function renderBudget(){
+  const sp={};KEYS.forEach(k=>sp[k]=0);
+  buys.filter(b=>b.date.startsWith(month)).forEach(b=>{if(b.bucket in sp)sp[b.bucket]+=b.price*b.qty});
+  const T=total(),S=KEYS.reduce((a,k)=>a+sp[k],0),L=T-S,P=pc(S,T);
+  const v=$('#v-budget');
+  v.innerHTML=`
+  <div class="hero">
+    <div class="lab">${L<0?'Over budget by':'Left this month'}</div>
+    <div class="big ${L<0?'neg':''}">${fmt(Math.abs(L))} <small>MAD</small></div>
+    <div class="bar"><i class="${cls(P)}" style="width:${Math.min(100,P)}%"></i></div>
+    <div class="sub">Spent ${fmt(S)} of ${fmt(T)} MAD · ${Math.round(P)}%</div>
+  </div>
+  ${store?'':'<div class="note">Saving is switched off in this preview. Open the hosted page to keep your data.</div>'}
+  ${msg?`<div class="note">${msg}</div>`:''}
+  ${KEYS.map(k=>{const l=plan[k]-sp[k],p=pc(sp[k],plan[k]);return `
+  <div class="row">
+    <div class="rtop"><span class="rn">${LBL[k]}</span><span class="amt"><input type="number" inputmode="numeric" data-k="${k}" value="${plan[k]}"><u>MAD</u></span></div>
+    <div class="bar sm"><i class="${cls(p)}" style="width:${Math.min(100,p)}%"></i></div>
+    <div class="rsub"><span>Spent ${fmt(sp[k])}</span><span class="${l<0?'neg':''}">${l<0?'Over by '+fmt(-l):'Left '+fmt(l)}</span></div>
+  </div>`}).join('')}
+  <div class="row tot"><div class="rtop" style="margin:0"><span class="rn">Total budget</span><span class="amt"><input id="tot" type="number" inputmode="numeric" value="${T}"><u>MAD</u></span></div></div>
+  <div class="hint">Change any amount and the next line adjusts so the total stays the same (bulk → Week 1 → Week 2 → … → buffer). Edit the total to change the whole budget.</div>
+  <div class="tiny"><button id="cp">Copy backup</button><button id="rs">Restore backup</button></div>`;
+  v.querySelectorAll('input[data-k]').forEach(i=>i.onchange=()=>setBudget(i.dataset.k,i.value));
+  $('#tot').onchange=e=>setTotal(e.target.value);
+  $('#cp').onclick=()=>{
+    const s=JSON.stringify({plan,buys});
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(s).then(()=>alert('Backup copied. Paste it somewhere safe, like the Notes app.')).catch(()=>prompt('Copy your backup:',s));
+    else prompt('Copy your backup:',s);
+  };
+  $('#rs').onclick=()=>{
+    const s=prompt('Paste your backup text');if(!s)return;
+    try{const o=JSON.parse(s);
+      if(o.plan&&Array.isArray(o.buys)&&confirm('Replace all current data with this backup?')){plan=Object.assign({},DEF,o.plan);buys=o.buys;msg='';save();renderAll()}
+    }catch(e){alert('That doesn’t look like a valid backup.')}
+  };
+}
+
+function renderList(){
+  const pm={};groups().forEach(g=>g.h.forEach((b,i)=>{if(i)pm[b.id]=g.h[i-1].price}));
+  const mine=buys.filter(b=>b.date.startsWith(month)).reverse().sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
+  const sum=mine.reduce((a,b)=>a+b.price*b.qty,0);
+  $('#list').innerHTML=mine.length?`<div class="sub" style="margin:0 0 4px">${mine.length} purchase${mine.length>1?'s':''} · ${fmt(sum)} MAD</div>`+mine.map(b=>`
+  <div class="li">
+    <div><div class="in">${esc(b.item)}</div><div class="is">${dshort(b.date)} · ${LBL[b.bucket]||''}${b.qty!==1?' · '+fmt(b.qty)+' × '+fmt(b.price):''}</div></div>
+    <div class="ir"><b>${fmt(b.price*b.qty)}</b>${chipv(pm[b.id],b.price)}<button class="x" data-id="${b.id}" aria-label="Delete">×</button></div>
+  </div>`).join(''):'<div class="empty">No purchases this month yet.<br>Add your first one above.</div>';
+}
+
+function renderPrices(){
+  const q=key($('#q').value||'');
+  const gs=[...groups().values()].filter(g=>key(g.name).includes(q)).sort((a,b)=>a.name.localeCompare(b.name));
+  $('#plist').innerHTML=gs.length?gs.map(g=>{
+    const h=g.h,ps=h.map(x=>x.price),last=h[h.length-1];
+    const avg=ps.reduce((a,b)=>a+b,0)/ps.length;
+    return `<details class="pi"><summary><span class="in">${esc(g.name)}</span><span class="ir"><b>${fmt(last.price)}</b><u>MAD</u>${chip(h)}</span></summary>
+    <div class="ph"><div class="st">Lowest ${fmt(Math.min(...ps))} · Highest ${fmt(Math.max(...ps))} · Avg ${fmt(avg)} · ${h.length}× bought</div>
+    ${h.map((x,i)=>`<div class="hr"><span>${dshort(x.date,1)}</span><span>${fmt(x.price)} MAD ${i?chipv(h[i-1].price,x.price):''}</span></div>`).reverse().join('')}</div></details>`;
+  }).join(''):`<div class="empty">${buys.length?'No items match your search.':'Prices appear here automatically<br>as you add purchases.'}</div>`;
+}
+
+function renderAll(){
+  const [y,m]=month.split('-').map(Number);
+  $('#mlabel').textContent=new Date(y,m-1,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  $('#items').innerHTML=[...groups().values()].map(g=>`<option value="${esc(g.name)}">`).join('');
+  renderBudget();renderList();renderPrices();
+}
+
+/* ---------- interactions ---------- */
+const shift=d=>{const [y,m]=month.split('-').map(Number);const dt=new Date(y,m-1+d,1);month=dt.getFullYear()+'-'+pad(dt.getMonth()+1);msg='';renderAll()};
+$('#pm').onclick=()=>shift(-1);$('#nm').onclick=()=>shift(1);
+
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  ['budget','spend','prices'].forEach(v=>$('#v-'+v).hidden=v!==t.dataset.v);
+  $('#mnav').hidden=t.dataset.v==='prices';
+});
+
+$('#bucket').innerHTML=KEYS.map(k=>`<option value="${k}">${LBL[k]}</option>`).join('');
+const autoBucket=()=>{const d=+$('#date').value.slice(8,10)||new Date().getDate();$('#bucket').value=d<=7?'w1':d<=14?'w2':d<=21?'w3':'w4'};
+$('#date').value=today();autoBucket();
+$('#date').onchange=autoBucket;
+$('#price').oninput=()=>{delete $('#price').dataset.auto};
+
+$('#item').oninput=()=>{
+  const g=groups().get(key($('#item').value)),p=$('#price');
+  if(g){
+    const l=g.h[g.h.length-1];
+    $('#hint').innerHTML=`Last price: <b>${fmt(l.price)} MAD</b> on ${dshort(l.date)} ${chip(g.h)}`;
+    if(!p.value||p.dataset.auto){p.value=l.price;p.dataset.auto=1}
+  }else{
+    $('#hint').textContent='';
+    if(p.dataset.auto){p.value='';delete p.dataset.auto}
+  }
+};
+
+$('#f').onsubmit=e=>{
+  e.preventDefault();
+  const name=$('#item').value.trim(),pr=parseFloat($('#price').value);
+  if(!name||isNaN(pr)||pr<0)return;
+  buys.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),date:$('#date').value||today(),item:name,price:pr,qty:parseFloat($('#qty').value)||1,bucket:$('#bucket').value});
+  month=($('#date').value||today()).slice(0,7);msg='';
+  save();
+  $('#item').value='';$('#price').value='';delete $('#price').dataset.auto;$('#qty').value=1;$('#hint').textContent='';
+  renderAll();$('#item').focus();
+};
+
+$('#list').onclick=e=>{
+  const b=e.target.closest('.x');if(!b)return;
+  if(confirm('Delete this purchase?')){buys=buys.filter(x=>x.id!==b.dataset.id);save();renderAll()}
+};
+$('#q').oninput=renderPrices;
+
+renderAll();
+</script>
+</body>
+</html>
