@@ -99,6 +99,7 @@ label input{margin-top:3px;padding:9px 8px}
 
   <section id="v-prices" hidden>
     <input id="q" type="search" placeholder="Search items…" style="margin-bottom:6px">
+    <div class="tiny" style="margin:0 0 8px"><button id="csvd">Download CSV</button><button id="csvc">Copy CSV</button></div>
     <div id="plist"></div>
   </section>
 </div>
@@ -282,6 +283,27 @@ $('#list').onclick=e=>{
   if(confirm('Delete this purchase?')){buys=buys.filter(x=>x.id!==b.dataset.id);save();renderAll()}
 };
 $('#q').oninput=renderPrices;
+
+function toCSV(){
+  const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const rows=[['date','item','unit_price_mad','quantity','total_mad','budget_line']];
+  [...buys].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0).forEach(b=>rows.push([b.date,q(b.item),b.price,b.qty,+(b.price*b.qty).toFixed(2),q(LBL[b.bucket]||b.bucket)]));
+  return rows.map(r=>r.join(',')).join('\n');
+}
+$('#csvd').onclick=()=>{
+  if(!buys.length)return alert('Nothing to export yet.');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([toCSV()],{type:'text/csv'}));
+  a.download='grocery-prices-'+today()+'.csv';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+$('#csvc').onclick=()=>{
+  if(!buys.length)return alert('Nothing to export yet.');
+  const s=toCSV();
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(s).then(()=>alert('CSV copied. Paste it into Notes, Sheets or an email.')).catch(()=>prompt('Copy your CSV:',s));
+  else prompt('Copy your CSV:',s);
+};
 
 renderAll();
 </script>
